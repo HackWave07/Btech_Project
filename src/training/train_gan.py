@@ -7,7 +7,7 @@ import json
 import matplotlib.pyplot as plt
 
 from src.losses.losses import compute_gradient_penalty, GradCAMConsistencyLoss, AttentionRegularizationLoss
-from src.utils.utils import save_image_grid, GradCAM
+from src.utils.visualization import save_image_grid, GradCAM
 
 def train_gan(config, generator, discriminator, classifier, train_loader):
     generator = generator.to(config.DEVICE)

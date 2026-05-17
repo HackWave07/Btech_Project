@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 import cv2
 import numpy as np
 
-from config.config import Config
+from src.config.config import Config
 from src.models.classifier import ResNetClassifier
 
 def predict(image_path, model_path):

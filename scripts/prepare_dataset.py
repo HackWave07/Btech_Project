@@ -1,6 +1,6 @@
 import os
 
-from config.config import Config
+from src.config.config import Config
 from src.data.dataset import prepare_dataset_csv
 
 def main():

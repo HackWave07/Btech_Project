@@ -2,7 +2,8 @@ import os
 import torch
 
 class Config:
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Root of the repository (two levels up from src/config/)
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     DATA_DIR = os.path.join(BASE_DIR, "PlantVillage")
     
     ALLOWED_FOLDERS = [
@@ -20,11 +21,13 @@ class Config:
     
     SEVERITY_LEVELS = ["mild", "moderate", "severe"]
     
-    CHECKPOINT_DIR = os.path.join(BASE_DIR, "checkpoints")
-    LOG_DIR = os.path.join(BASE_DIR, "logs")
-    PLOT_DIR = os.path.join(BASE_DIR, "plots")
-    METRICS_DIR = os.path.join(BASE_DIR, "metrics")
-    GEN_IMG_DIR = os.path.join(BASE_DIR, "generated_images")
+    # Storage directories
+    CHECKPOINT_DIR = os.path.join(BASE_DIR, "models", "checkpoints")
+    TRAINED_DIR   = os.path.join(BASE_DIR, "models", "trained")
+    LOG_DIR        = os.path.join(BASE_DIR, "logs")
+    PLOT_DIR       = os.path.join(BASE_DIR, "assets", "sample_outputs")
+    METRICS_DIR    = os.path.join(BASE_DIR, "metrics")
+    GEN_IMG_DIR    = os.path.join(BASE_DIR, "data", "synthetic")
     
     IMG_SIZE = 256
     CHANNELS = 3
@@ -54,5 +57,6 @@ class Config:
     
     @classmethod
     def setup_dirs(cls):
-        for d in [cls.CHECKPOINT_DIR, cls.LOG_DIR, cls.PLOT_DIR, cls.METRICS_DIR, cls.GEN_IMG_DIR]:
+        for d in [cls.CHECKPOINT_DIR, cls.TRAINED_DIR, cls.LOG_DIR,
+                  cls.PLOT_DIR, cls.METRICS_DIR, cls.GEN_IMG_DIR]:
             os.makedirs(d, exist_ok=True)

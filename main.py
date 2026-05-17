@@ -3,7 +3,7 @@ import sys
 import os
 import torch
 
-from config.config import Config
+from src.config.config import Config
 from src.data.dataset import get_dataloaders
 from src.models.generator import Generator
 from src.models.discriminator import Discriminator
@@ -11,7 +11,7 @@ from src.models.classifier import ResNetClassifier
 from src.training.train_classifier import train_classifier
 from src.training.train_gan import train_gan
 from src.evaluation.evaluate import evaluate_model, compare_models
-from src.utils.utils import set_seed
+from src.utils.helpers import set_seed
 
 def verify_environment():
     missing_packages = []
@@ -163,8 +163,8 @@ def main():
         if not args.image_path or not args.model_path:
             print("ERROR: --image_path and --model_path are required for inference mode.")
             sys.exit(1)
-        import scripts.inference as inf
-        inf.predict(args.image_path, args.model_path)
+        from src.inference.predict import predict
+        predict(args.image_path, args.model_path)
 
 if __name__ == "__main__":
     main()

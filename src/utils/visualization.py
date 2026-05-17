@@ -1,20 +1,7 @@
 import torch
-import numpy as np
-import random
-import os
-import matplotlib.pyplot as plt
 import torch.nn.functional as F
 import torchvision.utils as vutils
-
-def set_seed(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+import matplotlib.pyplot as plt
 
 def save_image_grid(tensor, path, nrow=8, normalize=True):
     vutils.save_image(tensor, path, nrow=nrow, normalize=normalize)

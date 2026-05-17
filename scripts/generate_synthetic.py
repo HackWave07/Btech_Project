@@ -5,7 +5,7 @@ from PIL import Image
 import torchvision.transforms as T
 from tqdm import tqdm
 
-from config.config import Config
+from src.config.config import Config
 from src.models.generator import Generator
 
 def main(num_samples_per_class=100):
