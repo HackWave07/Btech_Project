@@ -265,7 +265,10 @@ def main():
                 try:
                     grad_cam = GradCAM(model, model.get_target_layer())
                     cam = grad_cam(input_tensor, class_idx=cls_idx)
-                    cam_np = cam[0, 0].cpu().numpy()
+                    if isinstance(cam, torch.Tensor):
+                        cam_np = cam[0, 0].detach().cpu().numpy()
+                    else:
+                        cam_np = np.array(cam)[0, 0]
 
                     orig_np = np.array(
                         image.resize((Config.IMG_SIZE, Config.IMG_SIZE))
