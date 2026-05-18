@@ -80,19 +80,48 @@ DISEASE_INFO = {
 @st.cache_resource(show_spinner="Loading model…")
 def load_model():
     device = Config.DEVICE
-    model = ResNetClassifier(
-        len(Config.ALLOWED_FOLDERS), len(Config.SEVERITY_LEVELS)
-    ).to(device)
+    possible_paths = []
     for ckpt_name in ["best_classifier.pth", "baseline_classifier.pth", "demo_classifier.pth"]:
-        model_path = os.path.join(Config.CHECKPOINT_DIR, ckpt_name)
+        possible_paths.append(os.path.join(Config.CHECKPOINT_DIR, ckpt_name))
+        possible_paths.append(os.path.join(Config.BASE_DIR, "checkpoints", ckpt_name))
+        possible_paths.append(os.path.join(Config.BASE_DIR, ckpt_name))
+        
+    for model_path in possible_paths:
         if os.path.exists(model_path):
             try:
-                model.load_state_dict(torch.load(model_path, map_location=device))
+                state_dict = torch.load(model_path, map_location=device)
+                if 'cls_head.weight' in state_dict:
+                    num_classes = state_dict['cls_head.weight'].shape[0]
+                else:
+                    num_classes = len(Config.ALLOWED_FOLDERS)
+                    
+                if 'sev_head.weight' in state_dict:
+                    num_severities = state_dict['sev_head.weight'].shape[0]
+                else:
+                    num_severities = len(Config.SEVERITY_LEVELS)
+                
+                model = ResNetClassifier(num_classes, num_severities).to(device)
+                model.load_state_dict(state_dict)
                 model.eval()
-                return model, ckpt_name
+                
+                # Determine which classes array to return
+                if num_classes == 7:
+                    classes = [
+                        "Tomato_Bacterial_spot",
+                        "Tomato_Early_blight",
+                        "Tomato_Late_blight",
+                        "Tomato_Leaf_Mold",
+                        "Tomato_Septoria_leaf_spot",
+                        "Tomato_Spider_mites_Two_spotted_spider_mite",
+                        "Tomato_healthy"
+                    ]
+                else:
+                    classes = Config.ALLOWED_FOLDERS
+                    
+                return model, os.path.basename(model_path), classes
             except Exception:
                 continue
-    return None, None
+    return None, None, Config.ALLOWED_FOLDERS
 
 
 # ── Image transform ───────────────────────────────────────────────────────────
@@ -145,7 +174,7 @@ def main():
         )
         st.divider()
 
-        model, ckpt_name = load_model()
+        model, ckpt_name, classes = load_model()
         if model:
             st.success(f"✅ Model loaded  \n`{ckpt_name}`")
             st.caption(f"Device: `{Config.DEVICE.upper()}`")
@@ -191,7 +220,7 @@ def main():
 
             cls_idx   = int(np.argmax(cls_probs))
             sev_idx   = int(np.argmax(sev_probs))
-            cls_label = Config.ALLOWED_FOLDERS[cls_idx]
+            cls_label = classes[cls_idx]
             sev_label = Config.SEVERITY_LEVELS[sev_idx]
 
             # ── Headline metrics ──────────────────────────────────────────────
@@ -207,7 +236,7 @@ def main():
             with cc1:
                 st.pyplot(
                     confidence_chart(
-                        Config.ALLOWED_FOLDERS, cls_probs,
+                        classes, cls_probs,
                         "Disease Probabilities", "#2ecc71"
                     )
                 )
@@ -276,7 +305,7 @@ def main():
         """)
 
         st.subheader("Supported Classes")
-        for cls in Config.ALLOWED_FOLDERS:
+        for cls in classes:
             is_healthy = "healthy" in cls
             st.markdown(f"{'🟢' if is_healthy else '🔴'} `{cls}`")
 
