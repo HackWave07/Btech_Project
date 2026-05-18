@@ -21,6 +21,7 @@ if ROOT not in sys.path:
 from src.config.config import Config
 from src.models.classifier import ResNetClassifier
 from src.utils.visualization import GradCAM
+from src.utils.validation import validate_uploaded_image
 
 # ── Disease information lookup ────────────────────────────────────────────────
 DISEASE_INFO = {
@@ -198,7 +199,15 @@ def main():
             st.info("Upload an image to get started.")
             return
 
-        image = Image.open(uploaded).convert("RGB")
+        # Run robust preprocessing validation pipeline
+        with st.spinner("Validating uploaded image..."):
+            is_valid, validation_res = validate_uploaded_image(uploaded)
+
+        if not is_valid:
+            st.error(f"❌ **Validation Failed**  \n{validation_res}")
+            return
+
+        image = validation_res
 
         col_img, col_results = st.columns([1, 2], gap="large")
 
@@ -222,12 +231,18 @@ def main():
             sev_idx   = int(np.argmax(sev_probs))
             cls_label = classes[cls_idx]
             sev_label = Config.SEVERITY_LEVELS[sev_idx]
+            confidence = cls_probs[cls_idx]
+
+            if confidence < 0.60:
+                st.warning("⚠️ **Unable to confidently identify a plant leaf disease. Please upload a clearer tomato leaf image.**")
+                st.info(f"*(Model confidence: {confidence:.1%}, which is below the required 60.0% threshold)*")
+                return
 
             # ── Headline metrics ──────────────────────────────────────────────
             m1, m2, m3 = st.columns(3)
             m1.metric("🌿 Disease",  cls_label.replace("Tomato_", "").replace("_", " "))
             m2.metric("⚠️ Severity", sev_label.capitalize())
-            m3.metric("🎯 Confidence", f"{cls_probs[cls_idx]:.1%}")
+            m3.metric("🎯 Confidence", f"{confidence:.1%}")
 
             st.divider()
 
