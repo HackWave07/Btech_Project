@@ -23,14 +23,14 @@ ENV/
 *.ipynb_checkpoints
 
 # ── PyTorch / model artifacts ─────────────────────────────────────────────────
-*.pth
 *.pt
 *.ckpt
 *.pkl
 *.h5
 models/checkpoints/
 models/trained/
-checkpoints/
+checkpoints/*
+!checkpoints/demo_classifier.pth
 
 # ── Datasets ──────────────────────────────────────────────────────────────────
 PlantVillage/
